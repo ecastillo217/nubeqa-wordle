@@ -1,73 +1,125 @@
 const words = ["TUMOR", "CELLS", "CARES", "BAYER", "STAGE", "RISKS", "GLAND", "TESTS"]; // Customize!
-
 const answer = words[Math.floor(Math.random() * words.length)].toUpperCase();
-
-const board = document.getElementById("game-board");
-const message = document.getElementById("message");
 
 let currentRow = [];
 let attempts = 0;
+const maxAttempts = 6;
+
+const board = document.getElementById("game-board");
+const message = document.getElementById("message");
+const leaderboardList = document.getElementById("leaderboard-list");
 
 function createBoard() {
-    for (let i = 0; i < 30; i++) { // 6 attempts x 5 letters
-        const tile = document.createElement("div");
-        tile.classList.add("tile");
-        board.appendChild(tile);
+  for (let i = 0; i < maxAttempts * 5; i++) {
+    const tile = document.createElement("div");
+    tile.classList.add("tile");
+    board.appendChild(tile);
+  }
+}
+
+function createKeyboard() {
+  const keyboard = document.getElementById("keyboard");
+  const keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  keys.forEach(letter => {
+    const btn = document.createElement("button");
+    btn.textContent = letter;
+    btn.className = "key";
+    btn.addEventListener("click", () => handleKey(letter));
+    keyboard.appendChild(btn);
+  });
+
+  ["Enter", "Backspace"].forEach(key => {
+    const btn = document.createElement("button");
+    btn.textContent = key;
+    btn.className = "key";
+    btn.addEventListener("click", () => handleKey(key));
+    keyboard.appendChild(btn);
+  });
+}
+
+function handleKey(key) {
+  if (message.textContent) return;
+
+  if (key === "Backspace" && currentRow.length > 0) {
+    currentRow.pop();
+    updateBoard();
+  } else if (key === "Enter") {
+    if (currentRow.length === 5) {
+      handleGuess();
+    } else {
+      alert("Enter 5 letters");
     }
+  } else if (/^[A-Z]$/.test(key) && currentRow.length < 5) {
+    currentRow.push(key);
+    updateBoard();
+  }
 }
 
 function updateBoard() {
-    const tiles = document.querySelectorAll(".tile");
-    currentRow.forEach((letter, index) => {
-        tiles[attempts * 5 + index].textContent = letter;
-    });
+  const tiles = document.querySelectorAll(".tile");
+  const rowStart = attempts * 5;
+
+  for (let i = 0; i < 5; i++) {
+    tiles[rowStart + i].textContent = currentRow[i] || "";
+  }
 }
 
 function handleGuess() {
-    if (currentRow.length !== 5) {
-        alert("Enter 5 letters!");
-        return;
+  const guess = currentRow.join("");
+  const tiles = document.querySelectorAll(".tile");
+  const rowStart = attempts * 5;
+
+  for (let i = 0; i < 5; i++) {
+    const tile = tiles[rowStart + i];
+    const letter = guess[i];
+    const keyBtn = document.querySelector(`.key:contains('${letter}')`);
+
+    if (letter === answer[i]) {
+      tile.classList.add("correct");
+    } else if (answer.includes(letter)) {
+      tile.classList.add("present");
+    } else {
+      tile.classList.add("absent");
     }
-    const guess = currentRow.join("");
+  }
 
-    const tiles = document.querySelectorAll(".tile");
+  attempts++;
+  if (guess === answer) {
+    message.textContent = "🎉 Correct! You solved it!";
+    setTimeout(() => saveScore(attempts), 500);
+  } else if (attempts === maxAttempts) {
+    message.textContent = `❌ Game over! Word was: ${answer}`;
+    setTimeout(() => saveScore("X"), 500);
+  }
 
-    for (let i = 0; i < 5; i++) {
-        const tile = tiles[attempts * 5 + i];
-        if (guess[i] === answer[i]) {
-            tile.classList.add("correct");
-        } else if (answer.includes(guess[i])) {
-            tile.classList.add("present");
-        } else {
-            tile.classList.add("absent");
-        }
-    }
-
-    if (guess === answer) {
-        message.textContent = "🎉 Correct! Well done!";
-    } else if (attempts === 5) {
-        message.textContent = `❌ Game over! The word was ${answer}`;
-    }
-
-    attempts++;
-    currentRow = [];
+  currentRow = [];
 }
 
-document.addEventListener("keydown", function (e) {
-    if (message.textContent) return; // Stop if game over
+function saveScore(score) {
+  const name = prompt("Enter your name for the leaderboard:");
+  if (!name) return;
 
-    const key = e.key.toUpperCase();
-    if (/^[A-Z]$/.test(key) && currentRow.length < 5) {
-        currentRow.push(key);
-        updateBoard();
-    } else if (key === "BACKSPACE" && currentRow.length > 0) {
-        currentRow.pop();
-        updateBoard();
-        const tiles = document.querySelectorAll(".tile");
-        tiles[attempts * 5 + currentRow.length].textContent = "";
-    } else if (key === "ENTER") {
-        handleGuess();
-    }
-});
+  const entry = { name, score };
+  const scores = JSON.parse(localStorage.getItem("nubeqaScores") || "[]");
+  scores.push(entry);
+  localStorage.setItem("nubeqaScores", JSON.stringify(scores));
+  showLeaderboard();
+}
 
+function showLeaderboard() {
+  leaderboardList.innerHTML = "";
+  const scores = JSON.parse(localStorage.getItem("nubeqaScores") || "[]");
+  scores.sort((a, b) => a.score - b.score);
+
+  scores.slice(0, 10).forEach(entry => {
+    const li = document.createElement("li");
+    li.textContent = `${entry.name} — ${entry.score} tries`;
+    leaderboardList.appendChild(li);
+  });
+}
+
+// Init
 createBoard();
+createKeyboard();
+showLeaderboard();
