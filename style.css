@@ -1,50 +1,68 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f0f4f7;
-    margin: 0;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f4f8fc;
+  margin: 0;
+  padding: 20px;
 }
 
 h1 {
-    color: #004080;
+  color: #004080;
 }
 
 #game-board {
-    display: grid;
-    grid-template-columns: repeat(5, 50px);
-    grid-gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(5, 50px);
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
 }
 
 .tile {
-    width: 50px;
-    height: 50px;
-    background-color: white;
-    border: 2px solid #ccc;
-    font-size: 24px;
-    text-transform: uppercase;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: 50px;
+  height: 50px;
+  border: 2px solid #bbb;
+  font-size: 24px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
 }
 
-.correct {
-    background-color: #4caf50; /* Green */
-    color: white;
+.correct { background-color: #4caf50; color: white; }
+.present { background-color: #ffc107; }
+.absent { background-color: #ccc; }
+
+.keyboard {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
 }
 
-.present {
-    background-color: #ffeb3b; /* Yellow */
+.key {
+  padding: 10px 14px;
+  font-size: 16px;
+  border: none;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-.absent {
-    background-color: #ccc;
-}
+.key.used { opacity: 0.6; }
 
 #message {
-    margin-top: 20px;
-    font-size: 20px;
+  margin: 20px;
+  font-size: 18px;
 }
 
+.leaderboard {
+  margin-top: 30px;
+}
+
+.leaderboard ul {
+  list-style: none;
+  padding: 0;
+}
